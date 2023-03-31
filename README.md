@@ -1347,3 +1347,202 @@ int main()
     return 0;
 }
 ```
+
+## 6 函数
+
+### 6.1 概述
+
+**作用**：将一段经常使用的代码封装起来，减少重复代码
+
+一个较大的程序，一般分为若干个程序块，每个模块实现特定的功能。
+
+### 6.2 函数的定义
+
+函数的定义一般主要有5个步骤：
+
+1. 返回值类型
+2. 函数名
+3. 参数列表
+4. 函数体语句
+5. return表达式
+
+**语法**：
+
+```cpp
+返回值类型 函数名(参数列表){
+	函数体
+	return 语句;
+}
+```
+
+- 返回值类型：一个函数可以返回一个值。在函数定义中
+- 函数名：给函数起个名称
+- 参数列表：使用该函数时，传入的数据
+- 函数体语句：花括号内的代码，函数内需要执行的语句
+- return表达式：和返回值类型挂钩，函数执行完成后，返回相应的数据
+
+```cpp
+//返回值类型 函数名 参数列表{函数体 return 表达式}
+int add(int a, int b){
+    int sum = a + b;
+    return sum;
+}
+```
+
+### 6.3 函数的调用
+
+功能：使用定义好的函数
+
+语法：`函数名(参数)`
+
+```cpp
+int main()
+{
+    int a, b;
+    cout << "请输入两个数：" << endl;
+    cin >> a >> b;
+    int sum = add(a, b);
+    cout << a << " + " << b << " = "
+        << sum << endl;
+
+    return 0;
+}
+```
+
+> 总结：函数定义里小括号内成为**形参**，函数调用时传入的参数成为**实参。**
+
+### 6.4 值传递
+
+- 所谓值传递，就是函数调用时实参将数值传入给形参
+- 值传递时，如果**修改形参，实参不会受影**响
+
+```cpp
+//定义函数，实现两个数字进行交换
+void swap(int a, int b){
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main()
+{
+    //值传递
+    cout << "交换前：" << endl;
+    cout << "a: " << a
+        << " b: " << b << endl;
+    cout << "交换后：" << endl;
+    swap(a, b);
+    cout << "a: " << a
+        << " b: " << b << endl;
+
+
+    return 0;
+}
+```
+
+> 当值传递时，形参发生任何的改变，都不会影响实参。
+
+### 6.5 函数的常见样式
+
+常见的函数样式有4种
+
+1. 无参数无返回值
+2. 有参数无返回值
+3. 无参数有返回值
+4. 有参数有返回值
+
+```cpp
+//函数常见样式
+// 1. 无参数无返回值
+void test1(){
+    cout << "test1()" << endl;
+}
+// 2. 有参数无返回值
+void test2(int a){
+    cout << "test2() " << a << endl;
+}
+// 3. 无参数有返回值
+int test3(){
+    cout << "test3()" << endl;
+    return 12;
+}
+// 4. 有参数有返回值
+int test4(int a){
+    cout << "test4()" << endl;
+    return a;
+}
+```
+
+### 6.6 函数的声明
+
+**作用**：告诉编译器函数名称及如何调用函数。函数的实际主体可以单独定义。
+
+- 函数的**声明可以多次**，但是函数的**定义只能有一次**。
+
+```cpp
+//函数的声明
+//提前告诉编译器函数的存在
+int max(int , int);
+
+int main()
+{
+    int a, b;
+    cout << "请输入两个数：" << endl;
+    cin >> a >> b;
+    cout << "max(a, b) = " << max(a, b) << endl;
+
+    return 0;
+}
+
+//函数定义
+int max(int a, int b){
+    return a > b ? a : b;
+}
+```
+
+### 6.7 函数的分文件编写
+
+作用：让代码结构更加清晰
+
+函数分文件编写一般有4个步骤
+
+1. 创建后缀名为 `.h`的头文件
+2. 创建后缀名为 `.cpp`的源文件
+3. 在有文件中写函数的声明
+4. 在源文件中写函数的定义
+
+```cpp
+//swap.h文件
+#include <iostream>
+using namespace std;
+
+void swap(int, int);
+
+```
+
+```cpp
+//swap.cpp文件
+#include "swap.h"
+void swap(int a, int b){
+    int temp = a;
+    a = b;
+    b = temp;
+    cout << "a = " << a
+	<< " b = " << b << endl;
+}
+```
+
+```cpp
+//main.cpp
+#include<iostream>
+#include "swap.h"
+using namespace std;
+
+int main()
+{
+    int a = 10, b = 20;
+    swap(a, b);
+    return 0;
+}
+
+```
