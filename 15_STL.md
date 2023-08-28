@@ -529,7 +529,6 @@ void test01(){  // vector容器构造
 }
 ```
 
-
 ### 3.2.3 vector赋值操作
 
 | 函数原型                                  | 给vector容器进行赋值                        |
@@ -591,7 +590,6 @@ void test03(){  // vector容量和大小
 }
 ```
 
-
 ### 3.2.5 vector插入和删除
 
 | 函数原型                                             | 对vector容器进行插入和删除操作      |
@@ -631,7 +629,6 @@ void test04(){  // vector插入和删除
 }
 ```
 
-
 ### 3.2.6 vector数据存取
 
 | 函数原型         | 对vector中的数据的存取操作 |
@@ -653,7 +650,6 @@ void test05(){  // vector容器的数据存取
     cout << "v1.back() = " << v1.back() << endl;    // 1
 }
 ```
-
 
 ### 3.2.7 vector互换空间
 
@@ -696,7 +692,6 @@ void test06(){  // vector互换容器
 }
 ```
 
-
 ### 3.2.8 vector预留空间
 
 - 减少vector在动态扩展容量时的扩展次数
@@ -722,7 +717,290 @@ void test07(){  // vector预留空间
 
 ## 3.3 deque容器
 
+### 3.3.1 deque容器基本概念
+
+功能：**双端数组**，可以对头端进行插入删除操作
+
+**`deque`和 `vector`区别：**
+
+- vector对于头部的插入和删除效率低，数据量越大，效率越低
+- deque相对而言，对头部的插入删除速度比vector快
+- vector访问元素时的速度会比deque快，这和两者内部实现有关
+
+![deque结构](imgs/11_deque.png "deque")
+
+deque内部工作原理：
+
+- deque内部有个**中控器**，维护每段缓冲区中的内容，缓冲区中存放真实数据
+- 中控器维护的是每个缓冲区的地址，使得使用deque时像一片连续的内存空间
+- deque容器的迭代器也是**支持随机访问**的
+
+### 3.3.2 deque构造函数
+
+| 函数原型                     | deque容器构造                                   |
+| ---------------------------- | ----------------------------------------------- |
+| `deque<T> deq;`            | 默认构造函数                                    |
+| `deque(beg, end);`         | 构造函数将 `[beg, end)`区间中的元素拷贝给本身 |
+| `deque(n, elem);`          | 构造函数将n个elem拷贝给本身                     |
+| `deque(const deque &deq);` | 拷贝构造函数                                    |
+
+```cpp
+template<class T>
+void printDeq(const deque<T> &deq){
+    for(auto it=deq.cbegin(); it!=deq.cend(); ++it){
+        cout << *it << " ";
+    }
+    cout << endl;
+}
+
+void test01(){  // deque容器构造
+
+    deque<int> d1;
+    for(int i=0; i<7; ++i){
+        d1.push_back(i);
+    }
+    printDeq(d1);
+
+    deque<int> d2(d1.begin(), d1.end());
+    deque<int> d3(3, 6);    // 6 6 6
+    deque<int> d4(d3);  // 拷贝构造
+
+}
+```
+
+**总结：**deque容器和vector容器的构造方式几乎一致，灵活使用即可
+
+### 3.3.3 deque赋值操作
+
+| 函数原型                                | 给deque容器进行赋值                         |
+| --------------------------------------- | ------------------------------------------- |
+| `deque& operator=(const deque &deq);` | 重载等号操作符                              |
+| `assign(beg, end);`                   | 将 `[beg, end)`区间中的数据拷贝赋值给本身 |
+| `assign(n, elem);`                    | 将n个elem拷贝赋值给本身                     |
+
+```cpp
+void test02(){  // deque赋值操作
+    deque<int> d1;
+    for(int i=0; i<7; ++i){
+        d1.push_back(i);
+    }
+
+    // operator= 赋值
+    deque<int> d2;
+    d2 = d1;    // 0 1 2 3 4 5 6
+  
+    // assign 赋值
+    deque<int> d3;
+    d3.assign(d2.begin(), d2.end());    // 0 1 2 3 4 5 6
+  
+    deque<int> d4;
+    d4.assign(3, 6);    // 6 6 6
+}
+```
+
+### 3.3.4 deque大小操作
+
+| 函数原型                     | 对deque容器的大小进行操作                                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `deque.empty();`           | 判断容器是否为空                                                                                                |
+| `deque.size();`            | 返回容器中元素的个数                                                                                            |
+| `deque.resize(num);`       | 重新指定容器的长度为num，若容器变长，则以默认值填充新位置。<br />如果容器变短，则末尾超出容器长度的元素被删除。 |
+| `deque.resize(num, elem);` | 重新指定容器的长度为num，若容器变长，则以elem值填充新位置。<br />如果容器变短，则末尾超出容器长度的元素被删除   |
+
+```cpp
+void test03(){  // deque大小操作 
+    deque<int> d1 = {2,0,2,3,2,4,6,0,3,3};
+    printDeq(d1);
+    if(d1.empty()){
+        cout << "d1 is empty!" << endl;
+    }else{
+        cout << "Not empty." << endl;
+    }
+    cout << "d1.size() = " << d1.size() << endl;    // 10
+    d1.resize(4);
+    printDeq(d1);   // 2 0 2 3
+    d1.resize(6, 3);  
+    printDeq(d1);   // 2 0 2 3 3 3
+}
+```
+
+总结：
+
+- deque没有容量的概念
+- 判断是否为空 `empty`
+- 返回元素个数 `size`
+- 重新指定个数 `resize`
+
+### 3.3.5 deque插入和删除
+
+| 函数原型              | 两端插入               |
+| --------------------- | ---------------------- |
+| `push_back(elem);`  | 在容器尾部添加一个数据 |
+| `push_front(elem);` | 在容器头部插入一个数据 |
+| `pop_bakc();`       | 删除容器最后一个数据   |
+| `pop_front();`      | 删除容器第一个数据     |
+
+| 函数原型                   | 指定位置操作                                        |
+| -------------------------- | --------------------------------------------------- |
+| `insert(pos, elem);`     | 在pos位置插入一个elem元素的拷贝，返回新数据的位置   |
+| `insert(pos, n, elem);`  | 在pos位置插入n个elem数据，无返回值                  |
+| `insert(pos, beg, end);` | 在pos位置插入 `[beg, end)`区间的数据，无返回值    |
+| `clear();`               | 清空容器的所有数据                                  |
+| `erase(beg, end);`       | 删除 `[beg, end)`区间的数据，返回下一个数据的位置 |
+| `erase(pos);`            | 删除pos位置的数据，返回下一个数据的位置             |
+
+```cpp
+void test04(){  // deque容器插入和删除操作
+  
+    // 在头尾插入和删除元素
+    deque<int> d1;
+    // 尾插
+    d1.push_back(6);
+    d1.push_back(7);
+    printDeq(d1);   // 6 7
+    // 头插
+    d1.push_front(5);
+    d1.push_front(3);
+    printDeq(d1);   // 3 5 6 7
+    // 尾删
+    d1.pop_back();
+    // 头删
+    d1.pop_front();
+    printDeq(d1);   // 5 6
+
+    // 在指定位置删除元素
+    deque<int> d2 = {4,7,6,4,1,1};
+    auto it = d2.begin();
+    it = d2.erase(it+1);    // 返回删除元素后面的一个元素
+    printDeq(d2);   // 4 (7) 6 4 1 1
+    d2.erase(it, d2.end());
+    printDeq(d2);   // 4
+
+    // 插入
+    deque<int> d3 = {4,3};
+    d3.insert(d3.end(), 2, 9);  // 在d3.end()前插入2个9
+    printDeq(d3);   // 4 3 9 9
+    d3.insert(d3.begin(), d1.begin(), d1.end());    // 按照区间进行插入
+    printDeq(d3);   // 5 6 4 3 9 9
+
+    d3.clear(); // 清空
+}
+```
+
+### 3.3.6 deque数据存取
+
+| 函数原型         | 对deque中的数据的存取操作  |
+| ---------------- | -------------------------- |
+| `at(int idx);` | 返回索引idx所指的数据      |
+| `operator[];`  | 返回索引idx所指的数据      |
+| `front();`     | 返回容器中的第一个数据元素 |
+| `back();`      | 返回容器中最后一个数据元素 |
+
+```cpp
+void test05(){  // deque数据存取
+    deque<int> d = {2,0,2,4,2,7};
+    for(int i=0; i<d.size(); ++i){
+        // cout << d.at(i) << " "; // 2 0 2 4 2 7
+        cout << d[i] << " ";    // 同上
+    }
+    cout << endl;
+    cout << "d.front() = " << d.front() << endl;    // 2
+    cout << "d.back() = " << d.back() << endl;  // 7
+}
+```
+
+### 3.3.7 deque排序
+
+| 算法                                  | 利用算法实现对deque容器进行排序 |
+| ------------------------------------- | ------------------------------- |
+| `sort(iterator beg, iterator end);` | 对beg和end区间内的元素进行排序  |
+
+```cpp
+void test06(){  // deque排序
+    deque<int> d = {0,1,2,3,50,6,4};
+    d.push_back(3);
+    d.push_front(12);
+    printDeq(d);    // 12 0 1 2 3 50 6 4 3
+    // 对于支持随机访问的迭代器的容器，都可以利用sort算法直接对其进行排序
+    sort(d.begin(), d.end());   // 排序：默认排序规则，从小到大升序
+    printDeq(d);    // 0 1 2 3 3 4 6 12 50
+}
+```
+
 ## 3.4 案例-评委打分
+
+> 有5名选手：选手ABCDE，10个评委分别对每一名选手打分，去除最高分和最低分，然后取平均分。
+
+1. 创建五名选手，放到vector中
+2. 遍历vector容器，取出来每一个选手，执行for循环，可以把10个评委打分存到deque容器中
+3. sort算法对deque容器中分数排序，去除最高和最低分
+4. deque容器遍历一遍，累加总分
+5. 获取平均分
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <algorithm>
+
+using namespace std;
+
+// 案例-评委打分
+
+class Person{
+public:
+    Person() = default;
+    Person(const string &name) : Name(name) {}
+    Person(const string &name, const int &s) : Name(name), Score(s) {}
+    void getScore(const int &s){    // 评委打分
+        this->Score.push_back(s);
+    }
+    void getAvg(){
+        double avg = 0.0;
+        int i;
+        for(i=0; i<Score.size(); ++i){
+            avg += double(Score[i]);
+        }
+        this->Avg_Price =  avg / i;
+    }
+
+    string Name;
+    deque<int> Score;
+    double Avg_Price;
+};
+
+bool compare(const Person &p1, const Person &p2){
+    return p1.Avg_Price < p2.Avg_Price; // 按平均分从小到大排序
+}
+
+int main()
+{
+    // 1.创建五名选手
+    Person p1("Tom"), p2("David"), p3("Yi"), p4("Charlie"), p5("Bruce");
+    vector<Person> vecP = {p1, p2, p3, p4, p5};
+    for(auto it=vecP.begin(); it!=vecP.end(); ++it){
+        // 2.给五名选手打分
+        for(int i=0; i<10; ++i){
+            int x;
+            cin >> x;
+            it->getScore(x);
+        }
+        // 3.去除最高分、最低分，获取评分值
+        sort(it->Score.begin(), it->Score.end());
+        it->Score.pop_front();
+        it->Score.pop_back();
+        it->getAvg();
+    }
+    // 4.按照平均分排序vector数组
+    sort(vecP.begin(), vecP.end(), compare);
+    for(int i=0; i<vecP.size(); ++i){
+        cout << "Name: " << vecP[i].Name
+        << "\tAverage_Score: " << vecP[i].Avg_Price << endl;
+    }
+    return 0;
+}
+```
 
 ## 3.5 stack容器
 
