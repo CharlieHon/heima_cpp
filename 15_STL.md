@@ -1055,7 +1055,6 @@ void test01(){
 }
 ```
 
-
 ## 3.6 queue容器
 
 ### 3.6.1 queue基本概念
@@ -1123,7 +1122,6 @@ void test01(){
 }
 ```
 
-
 ## 3.7 list容器
 
 ### 3.7.1 list基本概念
@@ -1187,7 +1185,6 @@ void test01(){  // list构造
 }
 ```
 
-
 ### 3.7.3 list赋值和交换
 
 | 函数原型                              | 给list容器进行赋值，以及交换list容器        |
@@ -1219,7 +1216,6 @@ void test02(){  // list赋值和交换
 }
 ```
 
-
 ### 3.7.4 list大小操作
 
 | 函数原型               | 对list容器的大小进行操作                                                                                        |
@@ -1244,7 +1240,6 @@ void test03(){  // list大小操作
     printList(l1);  // 1 9
 }
 ```
-
 
 ### 3.7.5 list插入和删除
 
@@ -1295,7 +1290,6 @@ void test04(){  // list插入和删除
 }
 ```
 
-
 ### 3.7.6 list数据存取
 
 | 函数原型     | 对list容器中数据进行存取 |
@@ -1344,7 +1338,6 @@ void test06(){  // list反转和排序
     printList(l1);  // 9 7 6 5 4 3 2
 }
 ```
-
 
 ### 3.7.8 排序案例
 
@@ -1429,14 +1422,287 @@ int main()
 }
 ```
 
+总结：
+
+- 对于自定义数据类型，必须指定排序规则，否则编译器不知道如何进行排序
+- 高级排序只是在排序规则上再进行一次逻辑规则制定，并不复杂
 
 ## 3.8 set/multiset容器
 
+### 3.8.1 set基本概念
 
+**简介**：
+
+- 所有元素都会再插入时**自动被排序**
+
+**本质**：
+
+- set/multiset属于**关联式容器**，底层结构是用**二叉树**实现
+
+**set和multiset区别**：
+
+- set不允许容器中有重复的元素
+- multiset预序容器中有重复的元素
+
+### 3.8.2 set构造和赋值
+
+| 函数原型                | set容器构造  |
+| ----------------------- | ------------ |
+| `set<T> st;`          | 默认构造函数 |
+| `set(const set &st);` | 拷贝构造函数 |
+
+| 函数原型                           | 赋值           |
+| ---------------------------------- | -------------- |
+| `set& operator=(const set &st);` | 重载等号操作符 |
+
+```cpp
+template<class T>
+void printSet(const set<T> &st){    // set容器打印输出
+    for(auto it=st.cbegin(); it!=st.cend(); ++it){
+        cout << *it << " ";
+    }
+    cout << endl;
+}
+
+void test01(){  // set容器构造和赋值
+    set<int> s1;
+    // 插入数据，只有insert方式
+    s1.insert(10);
+    s1.insert(10);
+    s1.insert(10);
+    s1.insert(20);
+    s1.insert(30);
+    // 遍历容器
+    // set容器的特点：所有元素插入时会自动被排序
+    // set容器不允许插入重复值
+    printSet(s1);   // 10 20 30
+    set<int> s2(s1);    // 拷贝构造
+    set<int> s3 = s2;   // 赋值操作
+}
+```
+
+### 3.8.3 set大小和交换
+
+| 函数原型      | 统计set容器大小以及交换set容器 |
+| ------------- | ------------------------------ |
+| `size();`   | 返回容器中元素的数目           |
+| `empty();`  | 判断容器是否为空               |
+| `swap(st);` | 交换两个集合容器               |
+
+```cpp
+void test02(){  // set大小和交换
+    set<int> s1;
+    s1.insert(20);
+    s1.insert(30);
+    s1.insert(10);
+    s1.insert(40);
+    if(!s1.empty()){
+        cout << "s1.size = " << s1.size() << endl;  // 4
+        printSet(s1);   // 10 20 30 40
+    }else{
+        cout << "s1 is empty!" << endl;
+    }
+
+    set<int> s2 = {80, 50, 60};
+    printSet(s2);   // 50 60 80
+
+    // 交换
+    s1.swap(s2);
+    cout << "交换后：" << endl;
+    printSet(s1);   // 50 60 80
+    printSet(s2);   // 10 20 30 40
+}
+```
+
+### 3.8.4 set插入和删除
+
+| 函数原型             | set容器继续插入数据和删除数据                             |
+| -------------------- | --------------------------------------------------------- |
+| `insert(elem);`    | 在容器中插入元素                                          |
+| `clear();`         | 清空所有元素                                              |
+| `erase(pos);`      | 删除pos迭代器所指的元素，返回下一个元素的迭代器           |
+| `erase(beg, end);` | 删除区间 `[beg, end)`中所有元素，返回下一个元素的迭代器 |
+| `erase(elem);`     | 删除容器中值为elem的元素                                  |
+
+```cpp
+void test03(){
+    set<int> s1 = {1,9,4,9,2,0,2,3};
+    printSet(s1);   // 0 1 2 3 4 9
+
+    // 删除
+    s1.erase(s1.begin());
+    printSet(s1);   // 1 2 3 4 9
+    // 删除的重载版本
+    s1.erase(2);
+    printSet(s1);   // 1 3 4 9
+    s1.clear(); // 清空
+    // s1.erase(s1.begin(), s1.end()); // 同上
+    printSet(s1);   // 
+}
+```
+
+
+### 3.8.5 set查找和统计
+
+| 函数原型        | 对set容器进行查找数据以及统计数据                                                   |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `find(key);`  | 查找key是否存在，若存在，返回该键的元素的迭代器；<br />若不存在，返回 `set.end()` |
+| `count(key);` | 统计key的元素个数                                                                   |
+
+```cpp
+void test04(){  // set查找和统计
+    set<int> s1{4,7,6,4,1,1};
+    // 查找
+    auto iter = s1.find(6);
+    if(iter!=s1.end()){
+        cout << "find: " << *iter << endl;
+    }else{
+        cout << "Not Found!" << endl;
+    }
+    // 统计
+    int num = s1.count(1);  // 对于set而言，统计的结果要么是0，要么是1
+    cout << "num = " << num << endl;    // 1
+}
+```
+
+总结：
+
+- 查找 --- find(返回的是迭代器)
+- 统计 --- count(对于set，结果为0或者1)
+
+
+### 3.8.6 set和multiset区别
+
+区别：
+
+- set不可以插入重复数据，而multiset可以
+- set插入数据的同时会返回插入结果，表示插入是否成功
+- multiset不会检测数据，因此可以插入重复数据
+
+```cpp
+void test05(){  // set容器和multiset区别
+    set<int> s1;
+    pair<set<int>::iterator, bool> res = s1.insert(10);  // 返回类型 pair<iterator, bool>
+    if(res.second){
+        cout << "第一次插入成功" << endl;   // 成功
+    }else{
+        cout << "第一次插入失败" << endl;
+    }
+    res = s1.insert(10);
+    if(res.second){
+        cout << "第二次插入成功" << endl;
+    }else{
+        cout << "第二次插入失败" << endl;   // 失败
+    }
+
+    // multiset允许插入重复值
+    multiset<int> ms;
+    ms.insert(10);  // 返回类型 iterator
+    ms.insert(10);
+    ms.insert(6);
+    ms.insert(7);
+    for(auto it=ms.cbegin(); it!=ms.end(); ++it){
+        cout << *it << " "; // 6 7 10 10
+    }
+    cout << endl;
+}
+```
+
+总结：
+
+- 如果不允许插入重复数据可以利用set
+- 如果需要插入重复数据利用multiset
+
+### 3.8.7 pair对组创建
+
+功能描述：
+
+- 成对出现的数据，利用对组可以返回两个数据
+
+两种创建方式：
+
+- `pair<type, type> p(val1, val2);`
+- `pair<type, type> p = make_pair(val1, val2);`
+
+```cpp
+void test06(){  // pair对组创建
+    // 第一种方式
+    pair<string, int> p1("Tom", 20);
+    cout << "姓名：" << p1.first << " 年龄：" << p1.second << endl;
+    pair<string, int> p2 = make_pair("Jerry", 18);
+    cout << "姓名：" << p2.first << " 年龄：" << p2.second << endl;
+}
+```
+
+### 3.8.8 set容器排序
+
+- `set`容器默认排序规则为从小到大，如果改变排序规则
+- 利用**仿函数**，可以改变排序规则
+
+```cpp
+class MyCompare1{
+public:
+    bool operator()(const int &v1, const int &v2){
+        return v1 > v2; // 从大到小
+    }
+};
+
+class MyCompare2{
+public:
+    bool operator()(const Person &p1, const Person &p2){
+        return p1.Age > p2.Age; // 按年龄从大到小
+    }
+};
+
+
+void test07(){  // set容器排序
+    set<int> s1;
+    s1.insert(10);
+    s1.insert(50);
+    s1.insert(20);
+    s1.insert(60);
+    printSet(s1);   // 10 20 50 60
+  
+    // 指定排序规则为从大大小
+  
+    // 示例一：set存放内置数据类型
+    set<int, MyCompare1> s2; // 第个参数放一个用于排序的类
+    s2.insert(16);
+    s2.insert(20);
+    s2.insert(30);
+    s2.insert(10);
+    // printSet(s2);   // 错误：没有与参数列表匹配的函数
+    for(auto it=s2.cbegin(); it!=s2.end(); ++it){
+        cout << *it << " "; // 30 20 16 10
+    }
+    cout << endl;
+
+    // 示例二：set存放自定义数据类型
+    set<Person, MyCompare2> s3;
+    Person p1("刘备", 43), p2("关羽", 40), p3("张飞", 36), p4("黄忠", 45);
+    s3.insert(p1);
+    s3.insert(p2);
+    s3.insert(p3);
+    s3.insert(p4);
+    for(auto it=s3.cbegin(); it!=s3.cend(); ++it){
+        cout << *it << endl;
+    }
+/*
+姓名：黄忠 年龄：45
+姓名：刘备 年龄：43
+姓名：关羽 年龄：40
+姓名：张飞 年龄：36
+*/
+}
+```
+
+总结：
+
+- 利用仿函数可以指定set容器的排序规则
+- 对于自定义数据类型，set必须指定排序规则才可以插入数据
 
 
 ## 3.9 map/multimap容器
-
 
 
 
