@@ -1541,7 +1541,6 @@ void test03(){
 }
 ```
 
-
 ### 3.8.5 set查找和统计
 
 | 函数原型        | 对set容器进行查找数据以及统计数据                                                   |
@@ -1569,7 +1568,6 @@ void test04(){  // set查找和统计
 
 - 查找 --- find(返回的是迭代器)
 - 统计 --- count(对于set，结果为0或者1)
-
 
 ### 3.8.6 set和multiset区别
 
@@ -1701,9 +1699,316 @@ void test07(){  // set容器排序
 - 利用仿函数可以指定set容器的排序规则
 - 对于自定义数据类型，set必须指定排序规则才可以插入数据
 
-
 ## 3.9 map/multimap容器
 
+### 3.9.1 map基本概念
+
+**简介：**
+
+- map中所有元素都是 `pair`
+- pair中第一个元素为key(键值)，起到索引作用，第二个元素为value(实值)
+- 所有元素都会**根据元素的键值自动排序**
+
+**本质：**
+
+- map/multimap属于**关联式容器**，底层结构是用二叉树实现
+
+**优点：**
+
+- 可以根据key值快速找到value值
+
+**map和multimap区别：**
+
+- map不允许容器中有重复key值元素
+- multimap允许容器中**有重复key值**元素
+
+### 3.9.2 map构造和赋值
+
+| 函数原型                           | 对map容器进行构造和赋值操作 |
+| ---------------------------------- | --------------------------- |
+| `map<T1, T2> mp;`                | map默认构造函数             |
+| `map(const map &mp);`            | 拷贝构造函数                |
+| `map& operator=(const map &mp);` | 重载等号操作                |
+
+```cpp
+template<class T1, class T2>
+void printMap(map<T1, T2> &mp){   // 打印输出map容器
+    for(auto it=mp.cbegin(); it!=mp.cend(); ++it){
+        cout << "key: " << (*it).first << " value: " << it->second << endl;
+    }
+}
+
+void test01(){  // map容器构造和赋值
+    map<int, int> m;    // 创建map容器
+    m.insert(pair<int, int>(1, 10));
+    m.insert(pair<int, int>(3, 30));
+    m.insert(pair<int, int>(2, 20));
+    m.insert(pair<int, int>(4, 40));
+    printMap(m);
+/*
+key: 1 value: 10
+key: 2 value: 20
+key: 3 value: 30
+key: 4 value: 40
+*/
+    map<int, int> m2(m);    // 拷贝构造
+    map<int, int> m3 = m;   // 赋值操作
+}
+```
+
+> 总结：`map`中所有元素都是成对出现，插入数据时要使用对组。
+
+### 3.9.3 map大小和交换
+
+| 函数原型      | 统计map容器大小以及交换map容器 |
+| ------------- | ------------------------------ |
+| `size();`   | 返回容器中元素的数目           |
+| `empty();`  | 判断容器是否为空               |
+| `swap(mp);` | 交换两个集合容器               |
+
+```cpp
+void test02(){  // map容器大小和交换
+    map<int, int> m1;
+    m1.insert(pair<int, int>(1, 10));
+    m1.insert(pair<int, int>(3, 30));
+    m1.insert(pair<int, int>(2, 20));
+    if(m1.empty()){
+        cout << "m1 is empty!" << endl;
+    }else{
+        cout << "m1.size = " << m1.size() << endl;  // 3
+    }
+
+    // 交换
+    map<int, int> m2;
+    m2.insert(pair<int, int>(4, 100));
+    m2.insert(pair<int, int>(5, 200));
+    m2.insert(pair<int, int>(6, 300));
+    m1.swap(m2);
+    cout << "交换后：" << endl;
+    printMap(m1);
+    printMap(m2);
+/*
+key: 4 value: 100
+key: 5 value: 200
+key: 6 value: 300
+
+key: 1 value: 10
+key: 2 value: 20
+key: 3 value: 30
+*/
+}
+```
 
 
-## END
+### 3.9.4 map插入和删除
+
+| 函数原型             | map容器进行插入数据和删除数据                             |
+| -------------------- | --------------------------------------------------------- |
+| `insert(elem);`    | 在容器中插入元素                                          |
+| `clear();`         | 清除所有元素                                              |
+| `erase(pos);`      | 删除pos迭代器所指的元素，返回下一个元素的迭代器           |
+| `erase(beg, end);` | 删除区间 `[beg, end)`中所有元素，返回下一个元素的迭代器 |
+| `erase(key);`      | 删除容器中值为key的元素                                   |
+
+```cpp
+void test03(){  // map容器 插入和删除
+    map<int, int> m;
+    // 插入：方式一
+    m.insert(pair<int, int>(1, 10));
+    // 插入：方式二
+    m.insert(make_pair(2, 60));
+    // 插入：方式三
+    m.insert(map<int, int>::value_type(3, 30));
+    // 插入：方式四
+    m[4] = 40;
+    // []不建议插入，可以用key访问到value
+    // cout << m[5] << endl;   // 0 当map中没有键为5的对时，会自动创建一个
+    printMap(m);    // (1,10) (2,60), (3,30) (4,40)
+
+    // 删除
+    m.erase(m.begin());
+    printMap(m);    // (2,60) (3,30) (4,40)
+    m.erase(3); // 按照key删除，没有也不会报错
+    printMap(m);    // (2,60) (4,40)
+    // m.erase(m.begin(), m.end());
+    m.clear();  // 效果同上
+}
+
+```
+
+
+### 3.9.5 map查找和统计
+
+| 函数原型        | 对map容器进行查找数据以及统计数据                                                   |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `find(key);`  | 查找key是否存在，若存在，返回该键的元素的迭代器；<br />若不存在，返回 `map.end()` |
+| `count(key);` | 统计key的元素个数                                                                   |
+
+```cpp
+void test04(){  // map查找和统计
+    map<int, int> m;
+    m.insert(make_pair(1, 10));
+    m.insert(make_pair(2, 5));
+    m.insert(make_pair(3, 6));
+    m.insert(make_pair(3, 60)); // 并没有插入进去
+    map<int, int>::iterator pos = m.find(3);
+    if(pos != m.end()){
+        cout << "查到了元素 key = " << pos->first << " value = " << (*pos).second << endl;
+        // 查到了元素 key = 3 value = 6
+    }else{
+        cout << "Not Found!" << endl;
+    }
+
+    // 统计
+    // map不允许插入重复key元素，count结果要么为0，要么为1
+    // multimap可能大于1
+    int num = m.count(3);
+    cout << "num = " << num << endl;    // 1
+}
+```
+
+### 3.9.6 map容器排序
+
+- map容器默认排序规则为按照key值进行从大到小排序
+- 利用**仿函数**，可以改变排序规则
+
+```cpp
+class MyCompare1{
+public:
+    bool operator()(const int &v1, const int &v2){
+        return v1 > v2; // 按照值从大到小排序
+    }
+};
+
+void test05(){  // map容器排序
+    map<int, int> m;
+    m.insert(make_pair(1, 10));
+    m.insert(make_pair(2, 20));
+    m.insert(make_pair(3, 30));
+    m.insert(make_pair(5, 50));
+    m.insert(make_pair(4, 40));
+    printMap(m);
+/*
+key: 1 value: 10
+key: 2 value: 20
+key: 3 value: 30
+key: 4 value: 40
+key: 5 value: 50
+*/
+
+    map<int, int, MyCompare1> m2;
+    m2.insert(make_pair(1, 10));
+    m2.insert(make_pair(2, 20));
+    m2.insert(make_pair(3, 30));
+    m2.insert(make_pair(5, 50));
+    m2.insert(make_pair(4, 40));
+    for(auto it=m2.cbegin(); it!=m2.cend(); ++it){
+        cout << "key: " << it->first << " value:" << (*it).second << endl;
+    }
+/*
+key: 5 value:50
+key: 4 value:40
+key: 3 value:30
+key: 2 value:20
+key: 1 value:10
+*/
+}
+```
+
+## 3.10 案例-员工分组
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <ctime>
+
+using namespace std;
+
+#define CEHUA 1
+#define MEISHU 2
+#define YANFA 3
+
+// 员工分组案例
+class Worker{
+public:
+    Worker() = default;
+    Worker(const string &name, const int &salary) : Name(name), Salary(salary) {}
+    string Name;
+    int Salary;
+};
+
+// 创建员工数组
+void createWorker(vector<Worker> &vW){
+    string nameSeed = "ABCDEFGHIJK";
+    for(int i=0; i<10; ++i){
+        Worker w;
+        w.Name = string("员工") + nameSeed[i];
+        w.Salary = rand()%10001 + 10000;
+        // 将员工放到容器中
+        vW.push_back(w);
+    }
+}
+
+// 员工分组
+void setGroup(const vector<Worker> &vW, multimap<int, Worker> &mp){
+    for(auto it=vW.cbegin(); it!=vW.cend(); ++it){
+        // 产生随机部门编号
+        int deptId = rand()%3 + 1;
+        // 将员工擦汗如到分组中
+        // key为部门编号，value为worker
+        mp.insert(make_pair(deptId, *it));
+    }
+}
+
+// 分组显示员工
+void showWorkerByGroup(const multimap<int, Worker> &m){
+    cout << "策划部门：" << endl;
+    multimap<int, Worker>::const_iterator pos = m.find(CEHUA);
+    int count = m.count(CEHUA);
+    int index = 0;
+    for(; index<count && pos!=m.cend(); ++pos, ++index){
+        cout << "姓名：" << pos->second.Name << " 工资：" << pos->second.Salary << endl;
+    }
+    cout << "美术部门：" << endl;
+    pos = m.find(MEISHU);
+    count = m.count(MEISHU);
+    index = 0;
+    for(; index<count && pos!=m.cend(); ++pos, ++index){
+        cout << "姓名：" << pos->second.Name << " 工资：" << pos->second.Salary << endl;
+    }
+    cout << "研发部门：" << endl;
+    pos = m.find(YANFA);
+    count = m.count(YANFA);
+    index = 0;
+    for(; index<count && pos!=m.cend(); ++pos, ++index){
+        cout << "姓名：" << pos->second.Name << " 工资：" << pos->second.Salary << endl;
+    }
+}
+
+void printWorker(vector<Worker> &vW){   // 打印输出vector中员工信息
+    for(auto it=vW.cbegin(); it!=vW.cend(); ++it){
+        cout << "姓名：" << it->Name << " 年龄：" << (*it).Salary << endl;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    srand((unsigned int)time(NULL));
+    // 1.创建员工
+    vector<Worker> w;
+    createWorker(w);    // 创建员工
+    // printWorker(w); // 打印员工信息
+
+    // 2.员工分组
+    multimap<int, Worker> mp;
+    setGroup(w, mp);
+
+    // 3.分组显示成员
+    showWorkerByGroup(mp);
+
+    return 0;
+}
+```
