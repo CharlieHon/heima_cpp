@@ -1,4 +1,4 @@
-# 2.STL初始
+# 2.STL 初识
 
 ## 2.1 STL的诞生
 
@@ -73,7 +73,7 @@ STL容器就是将运用**最广泛的一些数据结构**实现出来
 
 STL中最常用的容器为 `vector`，可以了解为数组
 
-## 2.5.1 vector存放数据
+### 2.5.1 vector存放数据
 
 容器：`vector`
 
@@ -1799,7 +1799,6 @@ key: 3 value: 30
 }
 ```
 
-
 ### 3.9.4 map插入和删除
 
 | 函数原型             | map容器进行插入数据和删除数据                             |
@@ -1835,7 +1834,6 @@ void test03(){  // map容器 插入和删除
 }
 
 ```
-
 
 ### 3.9.5 map查找和统计
 
@@ -2012,3 +2010,251 @@ int main()
     return 0;
 }
 ```
+
+## 4.1 函数对象
+
+### 4.1.1 函数对象概念
+
+**概念：**
+
+- 重载**函数调用操作符**的类，其对象常称为**函数对象**
+- **函数对象**使用重载的 `()`时，行为类似函数调用，也叫**仿函数**
+
+**本质：**
+
+- 函数对象(仿函数)**是一个类**，不是一个函数
+
+### 4.1.2 函数对象使用
+
+**特点：**
+
+- 函数对象在使用时，可以像普通函数那样调用，可以有参数，可以有返回值
+- 函数对象超出普通函数的概念，函数对象可以有自己的状态
+- 函数对象可以作为参数传递
+
+```cpp
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+// 函数对象(仿函数)
+/*
+1.函数对象在使用时，可以像普通函数那样调用，可以有参数，可以有返回值
+2.函数对象超出普通函数的概念，函数对象可以有自己的状态
+3.函数对象可以作为参数传递
+*/
+class MyAdd{
+public:
+    int operator()(int v1, int v2){
+        return v1 + v2;
+    }
+};
+
+// 1.函数对象在使用时，可以像普通函数那样调用，可以有参数，可以有返回值
+void test01(){
+    MyAdd myadd;
+    cout << myadd(10, 10) << endl;  // 20
+}
+
+// 2.函数对象超出普通函数的概念，函数对象可以有自己的状态
+class MyPrint{
+public:
+    MyPrint() : count(0) {}
+    void operator()(string test){
+        cout << test << endl;
+        ++count;
+    }
+    int count;  // 内部自己状态
+};
+
+void test02(){
+    MyPrint myprint;
+    myprint("Hello, world");    // Hello, world
+    myprint("Hello, world");
+    myprint("Hello, world");
+    cout << "myprint调用次数：" << myprint.count << endl;
+}
+
+// 3.函数对象可以作为参数传递
+void doPrint(MyPrint &mp, const string &s){
+    mp(s);
+}
+void test03(){
+    MyPrint myPrint;
+    doPrint(myPrint, "Hello, C++");
+}
+
+int main()
+{
+    // test01();
+    // test02();
+    test03();
+    return 0;
+}
+```
+
+## 4.2 谓词
+
+### 4.2.1 谓词概念
+
+概念：
+
+- **返回 `bool`类型的仿函数称为 谓词**
+- 如果operator()接受一个参数，那么叫做一元谓词
+- 如果operator()接受两个参数，那么叫做二元谓词
+
+### 4.2.2 一元谓词
+
+```cpp
+class GreaterFive{  // 一元谓词
+public:
+    bool operator()(int val){   // 返回bool类型的仿函数角坐谓词
+        return val > 5;
+    }
+};
+
+void test01(){
+    vector<int> v;
+    for(int i=0; i<10; ++i){
+        v.push_back(i);
+    }
+    // 查找容器中 有没有大于5的数字
+    // GreaterFive() 匿名函数对象
+    vector<int>::iterator pos = find_if(v.begin(), v.end(), GreaterFive());
+    if(pos == v.end()){
+        cout << "未找到" << endl;
+    }else{
+        cout << "找到了大于5的数字为：" << *pos << endl;    // 6
+    }
+}
+```
+
+
+### 4.2.3 二元谓词
+
+```cpp
+void test02(){
+    vector<int> v = {10, 40, 20, 30, 50};
+    sort(v.begin(), v.end());
+    for(auto it=v.cbegin(); it!=v.cend(); ++it){
+        cout << *it << " "; // 10 20 30 40 50
+    }
+    cout << endl;
+    cout << "----" << endl;
+
+    // 使用函数对象，改变算法策略，将排序规则变为从大到小
+    sort(v.begin(), v.end(), Compare());    // Compare() 函数对象
+    for(auto it=v.cbegin(); it!=v.cend(); ++it){
+        cout << *it << " "; // 50 40 30 20 10
+    }
+    cout << endl;
+}
+```
+
+
+## 4.3 内建函数对象
+
+### 4.3.1 内建函数对象意义
+
+**概念：**
+
+- **STL内建了一些函数对象**
+
+**分类：**
+
+- 算术仿函数
+- 关系仿函数
+- 逻辑仿函数
+
+**用法：**
+
+- 这些仿函数所产生的对象，用法和一般函数完全相同
+- 使用内建函数对象，需要引入头文件 `#include <functional>`
+
+### 4.3.2 算术仿函数
+
+**功能描述：**
+
+- 其中**negate是一元运算**，其他都是二元运算
+
+| 仿函数原型                            | 实现四则运算 |
+| ------------------------------------- | ------------- |
+| `template<class T> T plus<T>`       | 加法仿函数    |
+| `template<class T> T minus<T>`      | 减法~         |
+| `template<class T> T multiolies<T>` | 乘法          |
+| `template<class T> T divides<T>`    | 除法          |
+| `template<class T> T modulus<T>`    | 取模          |
+| `template<class T> T negate<T>`     | 取反          |
+
+```cpp
+void test01(){
+    // negate 一元仿函数 取反仿函数
+    negate<int> n;
+    cout << n(50) << endl;  // -50
+    // plus 二元仿函数 加法
+    plus<int> add;
+    cout << add(12, 9) << endl; // 21
+}
+```
+
+### 4.3.3 关系仿函数
+
+| 仿函数原型                                  | 实现关系对比 |
+| ------------------------------------------- | ------------ |
+| `template<class T> bool equal_to<T>`      | 等于         |
+| `template<class T> bool not_equal_to<T>`  | 不等于       |
+| `template<class T> bool greater<T>`       | 大于         |
+| `template<class T> bool greater_equal<T>` | 大于等于     |
+| `template<class T> bool less<T>`          | 小于         |
+| `template<class T> bool less_equal<T>`    | 小于等于     |
+
+```cpp
+void test02(){  // 关系仿函数 greater大于
+    vector<int> v{4,7,6,4,1,1};
+    // greater<int> g;
+    // sort(v.begin(), v.end(), g);    // 从大到小排序
+    sort(v.begin(), v.end(), greater<int>());
+    for(auto it=v.cbegin(); it!=v.cend(); ++it){
+        cout << *it << " "; // 7 6 4 4 1 1
+    }
+    cout << endl;
+}
+```
+
+
+### 4.3.4 逻辑仿函数
+
+| 函数原型                                  | 实现逻辑运算 |
+| ----------------------------------------- | ------------ |
+| `template<class T> bool logical_and<T>` | 逻辑与       |
+| `template<class T> bool logical_or<T>`  | 逻辑或       |
+| `template<class T> bool logical_not<T>` | 逻辑非       |
+
+```cpp
+void test03(){  // 逻辑仿函数
+    vector<bool> v{true, false, true, false};
+    for(auto it=v.begin(); it!=v.end(); ++it){
+        cout << *it << " "; // 1 0 1 0
+    }
+    cout << endl;
+    // 利用逻辑非，将容器 v 搬运到 容器 v2 中，并执行取反操作
+    vector<bool> v2;
+    v2.resize(v.size());    // 需要先开辟空间再搬运
+    transform(v.begin(), v.end(), v2.begin(), logical_not<bool>());
+    cout << "------" << endl;
+    for(auto it=v2.begin(); it!=v2.end(); ++it){
+        cout << *it << " "; // 0 1 0 1
+    }
+    cout << endl;
+}
+```
+
+总结：逻辑仿函数实际应用较少，了解即可
+
+
+
+
+
+
+## END
