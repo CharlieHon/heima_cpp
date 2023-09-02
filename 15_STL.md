@@ -2130,7 +2130,6 @@ void test01(){
 }
 ```
 
-
 ### 4.2.3 二元谓词
 
 ```cpp
@@ -2151,7 +2150,6 @@ void test02(){
     cout << endl;
 }
 ```
-
 
 ## 4.3 内建函数对象
 
@@ -2179,13 +2177,13 @@ void test02(){
 - 其中**negate是一元运算**，其他都是二元运算
 
 | 仿函数原型                            | 实现四则运算 |
-| ------------------------------------- | ------------- |
-| `template<class T> T plus<T>`       | 加法仿函数    |
-| `template<class T> T minus<T>`      | 减法~         |
-| `template<class T> T multiolies<T>` | 乘法          |
-| `template<class T> T divides<T>`    | 除法          |
-| `template<class T> T modulus<T>`    | 取模          |
-| `template<class T> T negate<T>`     | 取反          |
+| ------------------------------------- | ------------ |
+| `template<class T> T plus<T>`       | 加法仿函数   |
+| `template<class T> T minus<T>`      | 减法~        |
+| `template<class T> T multiolies<T>` | 乘法         |
+| `template<class T> T divides<T>`    | 除法         |
+| `template<class T> T modulus<T>`    | 取模         |
+| `template<class T> T negate<T>`     | 取反         |
 
 ```cpp
 void test01(){
@@ -2222,7 +2220,6 @@ void test02(){  // 关系仿函数 greater大于
 }
 ```
 
-
 ### 4.3.4 逻辑仿函数
 
 | 函数原型                                  | 实现逻辑运算 |
@@ -2252,9 +2249,402 @@ void test03(){  // 逻辑仿函数
 
 总结：逻辑仿函数实际应用较少，了解即可
 
+## 5 STL-常用算法
+
+**概述：**
+
+- 算法主要是由头文件 `<algorithm>` `<functional>` `<numeric>`
+- `<algorithm>`是所有STL头文件中最大的一个，范围涉及到比较、交换、查找、遍历操作、复制、修改等等
+- `<numeric>`体积很小，只包括几个在序列上面进行**简单数学运算**的模板函数
+- `<functional>`定义了一些模板类，用以声明函数对象
+
+## 5.1 常用遍历算法
+
+| 函数原型                                                          | 算法简介               |
+| ----------------------------------------------------------------- | ---------------------- |
+| `for_each(iterator beg, iterator end, _func);`                  | 遍历容器               |
+| `transform(iterator beg1, iterator end1, iterator beg2, _func)` | 搬运容器到另一个容器中 |
+
+```cpp
+void print01(int val){
+    cout << val << " ";
+}
+
+class print02{
+public:
+    void operator()(int val){
+        cout << val << " ";
+    }
+};
+
+void test01(){  // 遍历算法 for_each
+    vector<int> v;
+    for(int i=0; i<10; ++i){
+        v.push_back(i);
+    }
+    // for_each(v.begin(), v.end(), print01);   // 0 1 2 3 4 5 6 7 8 9
+    for_each(v.begin(), v.end(), print02());    // 同上
+}
+```
+
+总结：`for_each`在实际开发中是最常用的遍历算法，需要熟练掌握
+
+```cpp
+class Transform{
+public:
+    int operator()(int val){
+        return val*val;
+    }
+};
+void test02(){  // 遍历算法 transform
+    vector<int> v{0,1,2,3};
+    vector<int> v2;
+    v2.resize(v.size());
+    transform(v.begin(), v.end(), v2.begin(), Transform());
+    for_each(v2.begin(), v2.end(), print01);    // 0 1 4 9
+}
+```
+
+## 5.2 常用查找算法
+
+算法简介：
+
+- `find`	// 查找元素
+- `find_if`	// 按条件查找元素
+- `adjacent_find`	// 查找相邻重复元素
+- `binary_search`	// 二分查找法
+- `count`	// 体积元素个数
+- `count_if`	// 按条件体积元素个数
+
+### 5.2.1 find
+
+| 函数原型                                    | 查找指定元素，找到返回指定元素的迭代器<br />找不到返回结束迭代器 end() |
+| ------------------------------------------- | ---------------------------------------------------------------------- |
+| `find(iterator beg, iterator end, value)` |                                                                        |
+
+```cpp
+class Person{
+public:
+    Person() = default;
+    Person(const string &name, const int &age) : Name(name), Age(age) {}
+    bool operator==(const Person &rhs) const{   // 使用find查找，需要重载==
+        return this->Name==rhs.Name && this->Age==rhs.Age;
+    }
+    string Name;
+    int Age;
+};
+void test03(){  // 查找算法：find
+    // 查找内置数据类型
+    vector<int> v{0,1,2,3,4,5,6,7,8,9,10};
+    int val = 5;
+    auto pos1 = find(v.begin(), v.end(), val);
+    if(pos1 == v.end()){
+        cout << "Not Found!" << endl;
+    }else{
+        cout << "Find: " << *pos1 << endl;  // 5
+    }
+  
+    // 查找自定义数据类型
+    Person p1("Tom", 21), p2("Jeff", 28), p3("Bruce", 30), p4("Charlie", 23);
+    vector<Person> v3{p1, p2, p3, p4};
+    auto pos2 = find(v3.begin(), v3.end(), p2);
+    if(pos2 == v3.end()){
+        cout << "Not Found!" << endl;
+    }else{
+        cout << "Find: " << pos2->Name << " " << pos2->Age << endl; // Jeff 28
+    }
+}
+```
+
+总结：利用find可以在容器中查找指定的元素，返回值是**迭代器**
+
+### 5.2.2 find_if
+
+| 函数原型                                        | 按条件查找元素                                    |
+| ----------------------------------------------- | ------------------------------------------------- |
+| `find_if(iterator beg, iterator end, _Pred);` | `_Pred`函数<br />或者谓词(返回bool类型的仿函数) |
+
+```cpp
+class GreaterFive{
+public:
+    bool operator()(int val){   // 返回大于5的值
+        return val > 5;
+    }
+};
+
+class Greater30{
+public:
+    bool operator()(Person &p){   // 年龄大于30
+        return p.Age > 30;
+    }
+};
+void test04(){  // 查找 find_if
+    // 1.查找内置数据类型
+    vector<int> v{0,1,2,3,4,5,6};
+    auto pos1 = find_if(v.begin(), v.end(), GreaterFive());
+    if(pos1 == v.end()){
+        cout << "Not Found" << endl;
+    }else{
+        cout << "Find " << *pos1 << " > 5." << endl;    // 6
+    }
+
+    // 2.查找自定义数据类型
+    Person p1("Tom", 21), p2("Jeff", 28), p3("Bruce", 31), p4("Charlie", 23);
+    vector<Person> v2{p1, p2, p3, p4};
+    // 找年龄大于30的人
+    auto pos2 = find_if(v2.begin(), v2.end(), Greater30());
+    if(pos2 == v2.end()){
+        cout << "Not Found" << endl;
+    }else{
+        cout << "Find " << pos2->Name << " > 30." << endl;  // Bruce
+    }
+}
+```
+
+### 5.2.3 adjacent_find
+
+| 函数原型                                       | 查找相邻重复元素                                       |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| `adjacent_find(iterator beg, iterator end);` | 查找相邻重复元素<br />返回相邻元素的第一个位置的迭代器 |
+
+```cpp
+void test05(){  // 查找相邻重复元素 adjacent_find
+    vector<int> v{4,7,6,4,1,1};
+    auto pos = adjacent_find(v.begin(), v.end());
+    if(pos != v.end()){
+        cout << "找到相邻重复元素：" << *pos << endl;   // 1
+    }else{
+        cout << "Not Found!" << endl;
+    }
+}
+```
+
+### 5.2.4 binary_search
+
+| 函数原型                                                   | 查找指定元素是否存在                              |
+| ---------------------------------------------------------- | ------------------------------------------------- |
+| `bool binary_search(iterator beg, iterator end, value);` | 查找指定的元素，查到返回 `true`，否则 `false` |
+
+```cpp
+void test06(){  // binary_search
+    vector<int> v{1,8,9,5,2,0,2,3};
+    sort(v.begin(), v.end());   // 容器必须是有序序列，否则结果不可靠
+    bool flag = binary_search(v.begin(), v.end(), 5);
+    if(flag){
+        cout << "Found!" << endl;
+    }else{
+        cout << "Not Found!" << endl;
+    }
+}
+```
+
+> 注意：**在无序序列中不可用**
+
+### 5.2.5 count
+
+| 函数原型                                      | 统计元素个数     |
+| --------------------------------------------- | ---------------- |
+| `count(iterator beg, iterator end, value);` | 统计元素出现次数 |
+
+```cpp
+void test07(){  // count
+    // 1.统计内置数据类型
+    vector<int> v{4,7,6,4,1,1,0,0};
+    int num1 = count(v.begin(), v.end(), 7);
+    cout << "7的元素个数是：" << num1 << endl;  // 1
+    // 2.统计自定义数据类型
+    Person p1("Tom", 21), p2("Charlie", 23), p3("Bruce", 30), p4("Jeff", 23);
+    vector<Person> v2{p1, p2, p3, p4};
+    Person pp("Lee", 23);
+    auto num2 = count(v2.begin(), v2.end(), pp);    // 统计与pp年龄相同的人员个数
+    cout << "与 " << pp.Name << " 年龄相同的人数有 " << num2 << endl;   // 2
+}
+```
+
+**总结**：统计自定义数据类型时，需要配合重载 `operator==`
+
+### 5.2.6 count_if
+
+| 函数原型                                        | 按条件统计             |
+| ----------------------------------------------- | ---------------------- |
+| `find_if(iterator beg, iterator end, _Pred);` | 按条件统计元素出现次数 |
+
+```cpp
+void test08(){  // count_if
+    // 1.内置数据类型
+    vector<int> v{4,7,6,4,1,1};
+    auto num1 = count_if(v.begin(), v.end(), GreaterFive());    // 统计大于5的个数
+    cout << "大于5的个数有：" << num1 << endl;  // 2
+    // 2.自定义数据类型
+    Person p1("Tom", 21), p2("Charlie", 66), p3("Bruce", 30), p4("Jeff", 23);
+    vector<Person> v2{p1, p2, p3, p4};
+    auto num2 = count_if(v2.begin(), v2.end(), Greater30());    // 年龄大于30的人员个数
+    cout << "30多岁的人有：" << num2 << endl;   // 1
+}
+```
+
+## 5.3 常用排序算法
+
+算法简介：
+
+- `sort`	// 对容器内元素进行排序
+- `random_shuffle`	// 洗牌 指定范围内的元素随机调整次序
+- `merge`	// 容器元素合并，并存储到另一容器中
+- `reverse`	// 反转指定范围的元素
+
+| 函数原型                                                                              |                                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `sort(iterator beg, iterator end, _Pred);`                                          | 对容器内元素进行排序<br />`_Pred`函数或者谓词                            |
+| `random_shuffle(iterator beg, iterator end, _Pred);`                                | 指定范围内的元素随机调整次序                                               |
+| `merge(iterator beg1, iterator end1, iterator beg2, iterator end2, iterator dest);` | 容器元素合并，并存储到另一容器中<br />注意：两个容器必须是**有序**的 |
+| `reverse(iterator beg, iterator end);`                                              | 反转指定范围的元素                                                         |
+
+```cpp
+void test09(){
+    // sort
+    vector<int> v1{1,3,5,7,6,2,0};
+    sort(v1.begin(), v1.end());
+    printVec(v1);   // 0 1 2 3 5 6 7
+    // sort降序排序
+    sort(v1.begin(), v1.end(), greater<int>());
+    printVec(v1);   // 7 6 5 3 2 1 0
+
+    // random_shuffle
+    vector<int> v2{0,1,2,3,4,5,6,7,8,9};
+    srand((unsigned)time(NULL));
+    random_shuffle(v2.begin(), v2.end());
+    printVec(v2);   // 8 1 9 2 0 5 7 3 4 6
+
+    // merge    两个容器必须是有序的，合并后仍有序
+    vector<int> v3{1,2,3}, v4{7,8,9}, dest;
+    // 目标容器需要提前开辟空间
+    dest.resize(v3.size()+v4.size());
+    merge(v3.begin(), v3.end(), v4.begin(), v4.end(), dest.begin());
+    for_each(dest.begin(), dest.end(), print01);    // 1 2 3 7 8 9
+    cout << endl;
+
+    // reverse
+    vector<int> v5{1,8,9,5,2,0,2,3};
+    reverse(v5.begin(), v5.end());
+    printVec(v5);   // 3 2 0 2 5 9 8 1
+}
+```
+
+## 5.4 常用拷贝和替换算法
+
+算法简介：
+
+- `copy`	// 容器内指定范围的元素拷贝到另一容器中
+- `replace`	// 将容器中指定范围的旧元素修改为新元素
+- `replace_if`	// 容器内指定范围满足条件的元素替换为新元素
+- `swap`	// 互换两个容器的元素
+
+| 函数原型                                                     | 功能                                                      |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `copy(iterator beg, iterator end, iterator dest);`         | 容器内指定范围内的元素拷贝到另一容器                      |
+| `replace(iterator beg, iterator end, oldvalue, newvalue);` | 将区间内旧元素替换成新元素                                |
+| `replace_if(iterator beg, iterator end, _Pred, newvalue);` | 将区间内满足条件的元素，替换成指定元素<br />`_Pred`谓词 |
+| `swap(container c1, container c2);`                        | 互换两个容器的元素                                        |
+
+```cpp
+void test10(){  // 常用拷贝和替换算法
+    // copy
+    vector<int> v1(3,6), dest;
+    dest.resize(v1.size());
+    copy(v1.begin(), v1.end(), dest.begin());
+    printVec(dest); // 6 6 6
+
+    // replace
+    vector<int> v2{3,2,1,5,7,9,5,6};
+    replace(v2.begin(), v2.end(), 5, 50);    // 将所有5替换为6
+    printVec(v2);   // 3 2 1 50 7 9 50 6
+
+    // replace_if
+    vector<int> v3{2,5,8,3,6,1,3};
+    replace_if(v3.begin(), v3.end(), GreaterFive(), 0); // 将大于5的数替换为0
+    printVec(v3);   // 2 5 0 3 0 1 3
+
+    // swap
+    vector<int> v4{1,8,9,5}, v5{2,0,0,1,1,2,2,0};
+    swap(v4, v5);
+    printVec(v4);   // 2 0 0 1 1 2 2 0
+    printVec(v5);   // 1 8 9 5
+}
+```
+
+- `replace_if`按条件查找，可以利用仿函数灵活筛选满足的条件
+
+## 5.5 常用算术生成算法
+
+- 算术生成算法属于小型算法，使用时包含的头文件为 `<numeric>`
+- `accumulate`	// 计算容器元素累计总和
+- `fill`	// 向容器中添加元素
+
+| 函数原型                                           | 功能描述                                                    |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| `accumulate(iterator beg, iterator end, value);` | 计算区间内容器元素累计总和<br />**value为起始累加值** |
+| `fill(iterator beg, iterator end, value);`       | 向容器中填充元素                                            |
+
+```cpp
+void test11(){  // 算术生成算法
+    // accumulate
+    vector<int> v1;
+    for(int i=1; i<=100; ++i){
+        v1.push_back(i);
+    }
+    cout << "Sum from 1 to 100 is " << accumulate(v1.begin(), v1.end(), 0) << endl; // 5050
+
+    // fill
+    vector<int> v2{0,1,2,3,4,5,6,7};
+    fill(v2.begin(), v2.end(), 1);  // 1 1 1 1 1 1 1 1
+}
+```
 
 
+## 5.6 常用集合算法
 
+算法简介：
 
+- `set_intersection`	// 求两个容器的交集
+- `set_union`	// 求两个容器的并集
+- `set_difference`	// 求两个容器的差集
+- 两个集合必须是**有序序列**
 
-## END
+| 函数原型                                                                                         | 功能描述 |
+| ------------------------------------------------------------------------------------------------ | -------- |
+| `set_intersection(iterator beg1, iterator end1, iterator beg2, iterator end2, iterator dest);` | 求交集   |
+| `set_union(iterator beg1, iterator end1, iterator beg2, iterator end2, iterator dest);`        | 求并集   |
+| `set_difference(iterator beg1, iterator end1, iterator beg2, iterator end2, iterator dest);`   | 求差集   |
+
+```cpp
+void test12(){  // 常用集合算法
+    vector<int> v1{1,2,3,4,5}, v2{3,4,5,6,7};
+    vector<int> dest1, dest2, dest3;
+    // set_intersection 交集
+    dest1.resize(min(v1.size(), v2.size()));    // 取交集的特殊情况是其中一个完全包含于另一个
+    // 返回最后交集结束的位置迭代器
+    auto pos1 = set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), dest1.begin());
+    // pos1为目标容器中指向交集尾后的迭代器
+    for_each(dest1.begin(), pos1, print01); // 3 4 5 开始开辟的空间可能过大，导致容器中产生多余的0
+    cout << endl;
+    // printVec(dest1);    // 3 4 5 0 0
+
+    // set_union    并集
+    dest2.resize(v1.size()+v2.size());
+    auto pos2 = set_union(v1.begin(), v1.end(), v2.begin(), v2.end(), dest2.begin());
+    for_each(dest2.begin(), pos2, print01); // 1 2 3 4 5 6 7
+    cout << endl;
+    // printVec(dest2);    // 1 2 3 4 5 6 7 0 0 0
+
+    // set_difference   差集
+    dest3.resize(max(v1.size(), v2.size()));
+    auto pos3 = set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(), dest3.begin());
+    for_each(dest3.begin(), pos3, print02());   // 1 2
+    cout << endl;
+    // printVec(dest3);    // 1 2 0 0 0
+}
+```
+
+- 求**交集/并集/差集**的两个集合必须是有序序列
+- 目标容器开辟空间需要从两个容器中取特殊情况值
+- **返回值即是求集合中最后一个元素的位置**
